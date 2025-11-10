@@ -3,6 +3,202 @@ import { getTransactions, getTransaction, createTransaction, updateTransaction, 
 import { validateRequest } from '../middleware/validateRequest';
 import { createTransactionSchema, updateTransactionSchema } from '../validation/transactionValidation';
 
+/**
+ * @openapi
+ * tags:
+ *   name: Transactions
+ *   description: Transaction management endpoints
+ */
+
+/**
+ * @openapi
+ * /transactions:
+ *   get:
+ *     summary: Retrieve all transactions
+ *     description: Get a list of all financial transactions from the database
+ *     tags: [Transactions]
+ *     responses:
+ *       200:
+ *         description: Transactions retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Transactions retrieved successfully"
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Transaction'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Internal server error"
+ */
+
+/**
+ * @openapi
+ * /transactions/{id}:
+ *   get:
+ *     summary: Get transaction by ID
+ *     tags: [Transactions]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Transaction ID
+ *     responses:
+ *       200:
+ *         description: Transaction retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Transaction retrieved successfully"
+ *                 data:
+ *                   $ref: '#/components/schemas/Transaction'
+ *       404:
+ *         description: Transaction not found
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @openapi
+ * /transactions:
+ *   post:
+ *     summary: Create a new transaction
+ *     tags: [Transactions]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateTransactionRequest'
+ *     responses:
+ *       201:
+ *         description: Transaction created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Transaction created successfully"
+ *                 data:
+ *                   $ref: '#/components/schemas/Transaction'
+ *       400:
+ *         description: Validation failed
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @openapi
+ * /transactions/{id}:
+ *   put:
+ *     summary: Update transaction by ID
+ *     tags: [Transactions]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Transaction ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateTransactionRequest'
+ *     responses:
+ *       200:
+ *         description: Transaction updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Transaction updated successfully"
+ *                 data:
+ *                   type: object
+ *                   example: {}
+ *       400:
+ *         description: Validation failed
+ *       404:
+ *         description: Transaction not found
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @openapi
+ * /transactions/{id}:
+ *   delete:
+ *     summary: Delete transaction by ID
+ *     tags: [Transactions]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Transaction ID
+ *     responses:
+ *       200:
+ *         description: Transaction deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Transaction deleted successfully"
+ *                 data:
+ *                   type: object
+ *                   example: {}
+ *       404:
+ *         description: Transaction not found
+ *       500:
+ *         description: Internal server error
+ */
+
 const router = Router();
 
 router.get('/', getTransactions);
