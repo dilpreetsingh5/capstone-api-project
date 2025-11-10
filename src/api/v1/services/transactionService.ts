@@ -1,7 +1,7 @@
 import { getAllTransactions, getTransactionById, createTransaction as createTransactionRepo, updateTransaction as updateTransactionRepo, deleteTransaction as deleteTransactionRepo } from '../repositories/transactionRepository';
 import { Transaction } from '../models/transactionModel';
 import { createTransactionSchema, updateTransactionSchema } from '../validation/transactionValidation';
-import { ServiceError } from '../errors/error';
+import { ServiceError } from '../errors/errors';
 import { HTTP_STATUS } from '../../../constants/httpConstants';
 
 /**
