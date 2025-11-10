@@ -3,6 +3,7 @@ import { accessLogger, errorLogger, consoleLogger } from "./api/v1/middleware/lo
 import accountRoutes from './api/v1/routes/accountRoutes';
 import transactionRoutes from './api/v1/routes/transactionRoutes';
 import budgetRoutes from './api/v1/routes/budgetRoutes';
+import setupSwagger from '../config/swagger';
 
 const app = express();
 
@@ -21,6 +22,9 @@ if (process.env.NODE_ENV === "production") {
 
 // Body parsing middleware
 app.use(express.json());
+
+// Setup Swagger
+setupSwagger(app);
 
 // Routes
 app.use('/api/v1/accounts', accountRoutes);
