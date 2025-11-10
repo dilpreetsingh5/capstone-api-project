@@ -1,5 +1,8 @@
 import express from 'express';
 import { accessLogger, errorLogger, consoleLogger } from "./api/v1/middleware/logger";
+import accountRoutes from './api/v1/routes/accountRoutes';
+import transactionRoutes from './api/v1/routes/transactionRoutes';
+import budgetRoutes from './api/v1/routes/budgetRoutes';
 
 const app = express();
 
@@ -18,6 +21,15 @@ if (process.env.NODE_ENV === "production") {
 
 // Body parsing middleware
 app.use(express.json());
+
+// Routes
+app.use('/api/v1/accounts', accountRoutes);
+app.use('/api/v1/transactions', transactionRoutes);
+app.use('/api/v1/budgets', budgetRoutes);
+
+// Error handling middleware
+import errorHandler from './api/v1/middleware/errorHandler';
+app.use(errorHandler);
 
 // Health check
 app.get('/health', (req, res) => {
