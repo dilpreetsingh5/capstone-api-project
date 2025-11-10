@@ -1196,6 +1196,568 @@
             "example": "USD"
           }
         }
+      },
+      "Account": {
+        "type": "object",
+        "required": [
+          "userId",
+          "name",
+          "type",
+          "balance",
+          "currency"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the account"
+          },
+          "userId": {
+            "type": "string",
+            "description": "ID of the user who owns the account"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the account",
+            "example": "Main Checking"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "checking",
+              "savings",
+              "credit",
+              "investment"
+            ],
+            "description": "Type of account",
+            "example": "checking"
+          },
+          "balance": {
+            "type": "number",
+            "description": "Current balance of the account",
+            "example": 1500
+          },
+          "currency": {
+            "type": "string",
+            "description": "Currency code (e.g., USD, EUR)",
+            "example": "USD"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          }
+        },
+        "example": {
+          "id": "acc_123",
+          "userId": "user_456",
+          "name": "Main Checking",
+          "type": "checking",
+          "balance": 1500,
+          "currency": "USD",
+          "createdAt": "2023-10-01T10:00:00.000Z",
+          "updatedAt": "2023-10-01T10:00:00.000Z"
+        }
+      },
+      "CreateAccountRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "type",
+          "balance",
+          "currency"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the account",
+            "example": "Main Checking"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "checking",
+              "savings",
+              "credit",
+              "investment"
+            ],
+            "description": "Type of account",
+            "example": "checking"
+          },
+          "balance": {
+            "type": "number",
+            "description": "Initial balance of the account",
+            "example": 1500
+          },
+          "currency": {
+            "type": "string",
+            "description": "Currency code",
+            "example": "USD"
+          }
+        },
+        "example": {
+          "name": "Main Checking",
+          "type": "checking",
+          "balance": 1500,
+          "currency": "USD"
+        }
+      },
+      "UpdateAccountRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the account",
+            "example": "Updated Checking"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "checking",
+              "savings",
+              "credit",
+              "investment"
+            ],
+            "description": "Type of account",
+            "example": "checking"
+          },
+          "balance": {
+            "type": "number",
+            "description": "Current balance of the account",
+            "example": 2000
+          },
+          "currency": {
+            "type": "string",
+            "description": "Currency code",
+            "example": "USD"
+          }
+        },
+        "example": {
+          "name": "Updated Checking",
+          "balance": 2000
+        }
+      },
+      "Budget": {
+        "type": "object",
+        "required": [
+          "userId",
+          "category",
+          "limit",
+          "spent",
+          "month",
+          "year"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the budget"
+          },
+          "userId": {
+            "type": "string",
+            "description": "ID of the user who owns the budget"
+          },
+          "category": {
+            "type": "string",
+            "description": "Budget category",
+            "example": "Food"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Budget limit amount",
+            "example": 500
+          },
+          "spent": {
+            "type": "number",
+            "description": "Amount already spent",
+            "example": 150
+          },
+          "month": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12,
+            "description": "Month of the budget (1-12)",
+            "example": 10
+          },
+          "year": {
+            "type": "integer",
+            "minimum": 2000,
+            "description": "Year of the budget",
+            "example": 2023
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          }
+        },
+        "example": {
+          "id": "budget_123",
+          "userId": "user_456",
+          "category": "Food",
+          "limit": 500,
+          "spent": 150,
+          "month": 10,
+          "year": 2023,
+          "createdAt": "2023-10-01T10:00:00.000Z",
+          "updatedAt": "2023-10-01T10:00:00.000Z"
+        }
+      },
+      "CreateBudgetRequest": {
+        "type": "object",
+        "required": [
+          "category",
+          "limit",
+          "spent",
+          "month",
+          "year"
+        ],
+        "properties": {
+          "category": {
+            "type": "string",
+            "description": "Budget category",
+            "example": "Food"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Budget limit amount",
+            "example": 500
+          },
+          "spent": {
+            "type": "number",
+            "description": "Initial amount spent",
+            "example": 0
+          },
+          "month": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12,
+            "description": "Month of the budget (1-12)",
+            "example": 10
+          },
+          "year": {
+            "type": "integer",
+            "minimum": 2000,
+            "description": "Year of the budget",
+            "example": 2023
+          }
+        },
+        "example": {
+          "category": "Food",
+          "limit": 500,
+          "spent": 0,
+          "month": 10,
+          "year": 2023
+        }
+      },
+      "UpdateBudgetRequest": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "description": "Budget category",
+            "example": "Groceries"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Budget limit amount",
+            "example": 600
+          },
+          "spent": {
+            "type": "number",
+            "description": "Amount already spent",
+            "example": 200
+          },
+          "month": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12,
+            "description": "Month of the budget (1-12)",
+            "example": 10
+          },
+          "year": {
+            "type": "integer",
+            "minimum": 2000,
+            "description": "Year of the budget",
+            "example": 2023
+          }
+        },
+        "example": {
+          "limit": 600,
+          "spent": 200
+        }
+      },
+      "ApiResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Indicates if the request was successful",
+            "example": true
+          },
+          "data": {
+            "description": "The response data (varies by endpoint)"
+          },
+          "message": {
+            "type": "string",
+            "description": "Success message",
+            "example": "Operation completed successfully"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error type (for error responses)"
+          },
+          "code": {
+            "type": "string",
+            "description": "Error code (for error responses)"
+          }
+        },
+        "example": {
+          "success": true,
+          "data": {},
+          "message": "Operation completed successfully"
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "message"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Always false for error responses",
+            "example": false
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable error message",
+            "example": "Validation failed"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error type or category",
+            "example": "VALIDATION_ERROR"
+          },
+          "code": {
+            "type": "string",
+            "description": "Specific error code",
+            "example": "VALIDATION_ERROR"
+          },
+          "details": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Detailed validation errors or additional error information",
+            "example": [
+              "name is required",
+              "email must be valid"
+            ]
+          }
+        },
+        "example": {
+          "success": false,
+          "message": "Validation failed",
+          "error": "VALIDATION_ERROR",
+          "code": "VALIDATION_ERROR",
+          "details": [
+            "name is required",
+            "email must be valid"
+          ]
+        }
+      },
+      "Transaction": {
+        "type": "object",
+        "required": [
+          "userId",
+          "accountId",
+          "amount",
+          "description",
+          "date",
+          "category",
+          "type",
+          "currency"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the transaction"
+          },
+          "userId": {
+            "type": "string",
+            "description": "ID of the user who owns the transaction"
+          },
+          "accountId": {
+            "type": "string",
+            "description": "ID of the account associated with the transaction"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Transaction amount"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the transaction"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date of the transaction"
+          },
+          "category": {
+            "type": "string",
+            "description": "Category of the transaction"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "income",
+              "expense"
+            ],
+            "description": "Type of transaction"
+          },
+          "currency": {
+            "type": "string",
+            "description": "Currency code (e.g., USD, EUR)"
+          },
+          "convertedAmount": {
+            "type": "number",
+            "description": "Amount converted to base currency"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          }
+        },
+        "example": {
+          "id": "txn_123",
+          "userId": "user_456",
+          "accountId": "acc_789",
+          "amount": 100.5,
+          "description": "Grocery shopping",
+          "date": "2023-10-01T10:00:00.000Z",
+          "category": "Food",
+          "type": "expense",
+          "currency": "USD",
+          "convertedAmount": 100.5,
+          "createdAt": "2023-10-01T10:00:00.000Z",
+          "updatedAt": "2023-10-01T10:00:00.000Z"
+        }
+      },
+      "CreateTransactionRequest": {
+        "type": "object",
+        "required": [
+          "accountId",
+          "amount",
+          "description",
+          "date",
+          "category",
+          "type",
+          "currency"
+        ],
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "description": "ID of the account for the transaction"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Transaction amount"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the transaction"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date of the transaction"
+          },
+          "category": {
+            "type": "string",
+            "description": "Category of the transaction"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "income",
+              "expense"
+            ],
+            "description": "Type of transaction"
+          },
+          "currency": {
+            "type": "string",
+            "description": "Currency code"
+          }
+        },
+        "example": {
+          "accountId": "acc_789",
+          "amount": 100.5,
+          "description": "Grocery shopping",
+          "date": "2023-10-01T10:00:00.000Z",
+          "category": "Food",
+          "type": "expense",
+          "currency": "USD"
+        }
+      },
+      "UpdateTransactionRequest": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "description": "ID of the account for the transaction"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Transaction amount"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the transaction"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date of the transaction"
+          },
+          "category": {
+            "type": "string",
+            "description": "Category of the transaction"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "income",
+              "expense"
+            ],
+            "description": "Type of transaction"
+          },
+          "currency": {
+            "type": "string",
+            "description": "Currency code"
+          }
+        },
+        "example": {
+          "amount": 150,
+          "description": "Updated grocery shopping",
+          "category": "Groceries"
+        }
       }
     }
   },
