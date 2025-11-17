@@ -5,3 +5,4 @@ logs/
 Security_Key.json
 docs/
 openapi.json
+.env
