@@ -1,9 +1,12 @@
+import dotenv from 'dotenv';
 import express from 'express';
 import { accessLogger, errorLogger, consoleLogger } from "./api/v1/middleware/logger";
 import accountRoutes from './api/v1/routes/accountRoutes';
 import transactionRoutes from './api/v1/routes/transactionRoutes';
 import budgetRoutes from './api/v1/routes/budgetRoutes';
 import setupSwagger from '../config/swagger';
+
+dotenv.config();
 
 const app = express();
 
