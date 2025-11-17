@@ -50,7 +50,7 @@ I chose ExchangeRate-API because it's free, easy to use, and meets the project's
 ## Integration with Existing API
 - The component will enhance the POST /transactions and PUT /transactions/:id endpoints.
 - No changes to other resources (Accounts, Budgets).
-- Maintains layered architecture: Routes -> Controllers -> Services -> Repository.
+- Maintains layered architecture: Routes -> Controllers -> Services -> Repository.                                            
 
 ## Potential Challenges
 - API rate limits: Mitigate with caching.
