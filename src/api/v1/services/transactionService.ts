@@ -13,7 +13,7 @@ export const getAllTransactionsService = async (): Promise<Transaction[]> => {
   try {
     return getAllTransactions();
   } catch (error) {
-    throw new Error('Failed to retrieve transactions');
+    throw new ServiceError('Failed to retrieve transactions', 'RETRIEVE_TRANSACTIONS_ERROR', HTTP_STATUS.INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -26,7 +26,7 @@ export const getTransactionByIdService = async (id: string): Promise<Transaction
   try {
     return getTransactionById(id);
   } catch (error) {
-    throw new Error('Failed to retrieve transaction');
+    throw new ServiceError('Failed to retrieve transaction', 'RETRIEVE_TRANSACTION_ERROR', HTTP_STATUS.INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -39,13 +39,13 @@ export const createTransactionService = async (transaction: Omit<Transaction, 'i
   try {
     const { error } = createTransactionSchema.validate(transaction);
     if (error) {
-      throw new Error(`Validation error: ${error.details[0].message}`);
+      throw new ServiceError(`Validation error: ${error.details[0].message}`, 'VALIDATION_ERROR', HTTP_STATUS.BAD_REQUEST);
     }
-    
+
     // Validate currency code
     const isValid = await isValidCurrency(transaction.currency);
     if (!isValid) {
-      throw new Error(`Invalid currency code: ${transaction.currency}`);
+      throw new ServiceError(`Invalid currency code: ${transaction.currency}`, 'INVALID_CURRENCY_ERROR', HTTP_STATUS.BAD_REQUEST);
     }
 
     // Convert currency to base currency (USD)
@@ -60,7 +60,10 @@ export const createTransactionService = async (transaction: Omit<Transaction, 'i
     const transactionWithConversion = { ...transaction, convertedAmount };
     return createTransactionRepo(transactionWithConversion);
   } catch (error) {
-    throw new Error('Failed to create transaction');
+    if (error instanceof ServiceError) {
+      throw error;
+    }
+    throw new ServiceError('Failed to create transaction', 'CREATE_TRANSACTION_ERROR', HTTP_STATUS.INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -91,7 +94,7 @@ export const updateTransactionService = async (id: string, transaction: Partial<
       if (transaction.currency !== undefined) {
         const isValid = await isValidCurrency(currencyToUse);
         if (!isValid) {
-          throw new Error(`Invalid currency code: ${currencyToUse}`);
+          throw new ServiceError(`Invalid currency code: ${currencyToUse}`, 'INVALID_CURRENCY_ERROR', HTTP_STATUS.BAD_REQUEST);
         }
       }
 
@@ -109,7 +112,7 @@ export const updateTransactionService = async (id: string, transaction: Partial<
     if (error instanceof ServiceError) {
       throw error;
     }
-    throw new Error('Failed to update transaction');
+    throw new ServiceError('Failed to update transaction', 'UPDATE_TRANSACTION_ERROR', HTTP_STATUS.INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -127,6 +130,6 @@ export const deleteTransactionService = async (id: string): Promise<boolean> => 
     await deleteTransactionRepo(id);
     return true;
   } catch (error) {
-    throw new Error('Failed to delete transaction');
+    throw new ServiceError('Failed to delete transaction', 'DELETE_TRANSACTION_ERROR', HTTP_STATUS.INTERNAL_SERVER_ERROR);
   }
 };

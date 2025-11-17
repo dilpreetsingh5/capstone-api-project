@@ -1,5 +1,7 @@
 import axios from 'axios';
 import { ExchangeRateResponse } from '../models/currencyModel';
+import { ServiceError } from '../errors/errors';
+import { HTTP_STATUS } from '../../../constants/httpConstants';
 
 const EXCHANGE_RATE_API_KEY = process.env.EXCHANGE_RATE_API_KEY;
 const EXCHANGE_RATE_API_URL = `https://v6.exchangerate-api.com/v6/${EXCHANGE_RATE_API_KEY}/latest/`;
@@ -14,7 +16,7 @@ export const getExchangeRates = async (baseCurrency: string = 'USD'): Promise<Ex
     const response = await axios.get(`${EXCHANGE_RATE_API_URL}${baseCurrency}`);
     return response.data;
   } catch (error) {
-    throw new Error('Failed to fetch exchange rates');
+    throw new ServiceError('Failed to fetch exchange rates', 'FETCH_EXCHANGE_RATES_ERROR', HTTP_STATUS.INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -39,12 +41,15 @@ export const convertCurrency = async (
     const rate = rates.conversion_rates[fromCurrency.toUpperCase()];
 
     if (!rate) {
-      throw new Error(`Exchange rate not available for ${fromCurrency} to ${toCurrency}`);
+      throw new ServiceError(`Exchange rate not available for ${fromCurrency} to ${toCurrency}`, 'EXCHANGE_RATE_NOT_AVAILABLE', HTTP_STATUS.BAD_REQUEST);
     }
 
     return amount / rate;
   } catch (error) {
-    throw new Error('Currency conversion failed');
+    if (error instanceof ServiceError) {
+      throw error;
+    }
+    throw new ServiceError('Currency conversion failed', 'CURRENCY_CONVERSION_ERROR', HTTP_STATUS.INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -58,6 +63,7 @@ export const isValidCurrency = async (currency: string): Promise<boolean> => {
     const rates = await getExchangeRates('USD');
     return currency.toUpperCase() in rates.conversion_rates || currency.toUpperCase() === 'USD';
   } catch (error) {
+    // For validation, we can return false on error, but perhaps log it
     return false;
   }
 };

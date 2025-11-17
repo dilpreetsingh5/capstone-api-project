@@ -1,6 +1,8 @@
 import { getAllAccounts as getAllAccountsRepo, getAccountById as getAccountByIdRepo, createAccount as createAccountRepo, updateAccount as updateAccountRepo, deleteAccount as deleteAccountRepo } from '../repositories/accountRepository';
 import { Account } from '../models/accountModel';
 import { createAccountSchema, updateAccountSchema } from '../validation/accountValidation';
+import { ServiceError } from '../errors/errors';
+import { HTTP_STATUS } from '../../../constants/httpConstants';
 
 /**
  * Retrieves all accounts
@@ -10,7 +12,7 @@ export const getAllAccounts = async (): Promise<Account[]> => {
   try {
     return getAllAccountsRepo();
   } catch (error) {
-    throw new Error('Failed to retrieve accounts');
+    throw new ServiceError('Failed to retrieve accounts', 'RETRIEVE_ACCOUNTS_ERROR', HTTP_STATUS.INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -23,7 +25,7 @@ export const getAccountById = async (id: string): Promise<Account | null> => {
   try {
     return getAccountByIdRepo(id);
   } catch (error) {
-    throw new Error('Failed to retrieve account');
+    throw new ServiceError('Failed to retrieve account', 'RETRIEVE_ACCOUNT_ERROR', HTTP_STATUS.INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -36,15 +38,18 @@ export const createAccount = async (account: Omit<Account, 'id'>): Promise<Accou
   try {
     const { error } = createAccountSchema.validate(account);
     if (error) {
-      throw new Error(`Validation error: ${error.details[0].message}`);
+      throw new ServiceError(`Validation error: ${error.details[0].message}`, 'VALIDATION_ERROR', HTTP_STATUS.BAD_REQUEST);
     }
     // Business logic: Ensure balance is not negative for certain types
     if (account.type === 'credit' && account.balance > 0) {
-      throw new Error('Credit account balance cannot be positive');
+      throw new ServiceError('Credit account balance cannot be positive', 'BUSINESS_LOGIC_ERROR', HTTP_STATUS.BAD_REQUEST);
     }
     return createAccountRepo(account);
   } catch (error) {
-    throw new Error('Failed to create account');
+    if (error instanceof ServiceError) {
+      throw error;
+    }
+    throw new ServiceError('Failed to create account', 'CREATE_ACCOUNT_ERROR', HTTP_STATUS.INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -62,16 +67,19 @@ export const updateAccount = async (id: string, account: Partial<Account>): Prom
     }
     const { error } = updateAccountSchema.validate(account);
     if (error) {
-      throw new Error(`Validation error: ${error.details[0].message}`);
+      throw new ServiceError(`Validation error: ${error.details[0].message}`, 'VALIDATION_ERROR', HTTP_STATUS.BAD_REQUEST);
     }
     // Business logic: Prevent changing userId (if present)
     if (account.userId !== undefined && account.userId !== existing.userId) {
-      throw new Error('Cannot change account userId');
+      throw new ServiceError('Cannot change account userId', 'BUSINESS_LOGIC_ERROR', HTTP_STATUS.BAD_REQUEST);
     }
     await updateAccountRepo(id, account);
     return { ...existing, ...account, updatedAt: new Date() };
   } catch (error) {
-    throw new Error('Failed to update account');
+    if (error instanceof ServiceError) {
+      throw error;
+    }
+    throw new ServiceError('Failed to update account', 'UPDATE_ACCOUNT_ERROR', HTTP_STATUS.INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -90,6 +98,6 @@ export const deleteAccount = async (id: string): Promise<boolean> => {
     await deleteAccountRepo(id);
     return true;
   } catch (error) {
-    throw new Error('Failed to delete account');
+    throw new ServiceError('Failed to delete account', 'DELETE_ACCOUNT_ERROR', HTTP_STATUS.INTERNAL_SERVER_ERROR);
   }
 };
