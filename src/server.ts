@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config();
 // Import the  Express app instance that created in app.ts
 import app from "./app";
 
