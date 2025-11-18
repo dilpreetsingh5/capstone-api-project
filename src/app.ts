@@ -1,3 +1,4 @@
+import morgan from "morgan";
 import dotenv from 'dotenv';
 import express from 'express';
 import { accessLogger, errorLogger, consoleLogger } from "./api/v1/middleware/logger";
@@ -25,6 +26,9 @@ if (process.env.NODE_ENV === "production") {
 
 // Body parsing middleware
 app.use(express.json());
+
+// Use morgan for HTTP request logging
+app.use(morgan("combined"));
 
 // Setup Swagger
 setupSwagger(app);
