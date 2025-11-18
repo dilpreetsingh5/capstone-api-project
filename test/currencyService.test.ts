@@ -1,7 +1,11 @@
 import axios from 'axios';
-import { getExchangeRates, convertCurrency, isValidCurrency } from '../src/api/v1/services/currencyService';
 import { ServiceError } from '../src/api/v1/errors/errors';
 import { HTTP_STATUS } from '../src/constants/httpConstants';
+
+// Mock environment variable before importing the service
+process.env.EXCHANGE_RATE_API_KEY = 'mock-api-key';
+
+import { getExchangeRates, convertCurrency, isValidCurrency } from '../src/api/v1/services/currencyService';
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -9,6 +13,7 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 describe('Currency Service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Mock the API key environment variable
   });
 
   describe('getExchangeRates', () => {
@@ -22,7 +27,7 @@ describe('Currency Service', () => {
 
       const result = await getExchangeRates('USD');
 
-      expect(mockedAxios.get).toHaveBeenCalledWith('https://v6.exchangerate-api.com/v6/undefined/latest/USD');
+      expect(mockedAxios.get).toHaveBeenCalledWith('https://v6.exchangerate-api.com/v6/mock-api-key/latest/USD');
       expect(result).toEqual(mockResponse);
     });
 
@@ -43,7 +48,7 @@ describe('Currency Service', () => {
 
       await getExchangeRates();
 
-      expect(mockedAxios.get).toHaveBeenCalledWith('https://v6.exchangerate-api.com/v6/undefined/latest/USD');
+      expect(mockedAxios.get).toHaveBeenCalledWith('https://v6.exchangerate-api.com/v6/mock-api-key/latest/USD');
     });
   });
 
@@ -63,7 +68,7 @@ describe('Currency Service', () => {
       const result = await convertCurrency(100, 'USD', 'EUR');
 
       expect(result).toBeCloseTo(84.75, 2); // 100 / 1.18 ≈ 84.75
-      expect(mockedAxios.get).toHaveBeenCalledWith('https://v6.exchangerate-api.com/v6/undefined/latest/EUR');
+      expect(mockedAxios.get).toHaveBeenCalledWith('https://v6.exchangerate-api.com/v6/mock-api-key/latest/EUR');
     });
 
     it('should throw ServiceError for unavailable exchange rate', async () => {
