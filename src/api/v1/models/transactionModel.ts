@@ -42,7 +42,7 @@
  *           description: Type of transaction
  *         currency:
  *           type: string
- *           description: Currency code (e.g., USD, EUR)
+ *           description: Currency code (ISO 4217, e.g., USD, EUR, GBP). Supported currencies are those available via the exchange rate API.
  *         convertedAmount:
  *           type: number
  *           description: Amount converted to base currency
@@ -101,7 +101,7 @@
  *           description: Type of transaction
  *         currency:
  *           type: string
- *           description: Currency code
+ *           description: Currency code (ISO 4217, e.g., USD, EUR, GBP). Supported currencies are those available via the exchange rate API.
  *       example:
  *         accountId: "acc_789"
  *         amount: 100.50
@@ -136,7 +136,7 @@
  *           description: Type of transaction
  *         currency:
  *           type: string
- *           description: Currency code
+ *           description: Currency code (ISO 4217, e.g., USD, EUR, GBP). Supported currencies are those available via the exchange rate API.
  *       example:
  *         amount: 150.00
  *         description: "Updated grocery shopping"

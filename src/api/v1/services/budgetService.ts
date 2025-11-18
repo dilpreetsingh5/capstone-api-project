@@ -1,6 +1,8 @@
 import { getAllBudgets, getBudgetById, createBudget as createBudgetRepo, updateBudget as updateBudgetRepo, deleteBudget as deleteBudgetRepo } from '../repositories/budgetRepository';
 import { Budget } from '../models/budgetModel';
 import { createBudgetSchema, updateBudgetSchema } from '../validation/budgetValidation';
+import { ServiceError } from '../errors/errors';
+import { HTTP_STATUS } from '../../../constants/httpConstants';
 
 /**
  * Retrieves all budgets
@@ -10,7 +12,7 @@ export const getAllBudgetsService = async (): Promise<Budget[]> => {
   try {
     return getAllBudgets();
   } catch (error) {
-    throw new Error('Failed to retrieve budgets');
+    throw new ServiceError('Failed to retrieve budgets', 'RETRIEVE_BUDGETS_ERROR', HTTP_STATUS.INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -23,7 +25,7 @@ export const getBudgetByIdService = async (id: string): Promise<Budget | null> =
   try {
     return getBudgetById(id);
   } catch (error) {
-    throw new Error('Failed to retrieve budget');
+    throw new ServiceError('Failed to retrieve budget', 'RETRIEVE_BUDGET_ERROR', HTTP_STATUS.INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -36,15 +38,18 @@ export const createBudgetService = async (budget: Omit<Budget, 'id'>): Promise<B
   try {
     const { error } = createBudgetSchema.validate(budget);
     if (error) {
-      throw new Error(`Validation error: ${error.details[0].message}`);
+      throw new ServiceError(`Validation error: ${error.details[0].message}`, 'VALIDATION_ERROR', HTTP_STATUS.BAD_REQUEST);
     }
     // Business logic: Ensure spent does not exceed limit
     if (budget.spent > budget.limit) {
-      throw new Error('Spent amount cannot exceed budget limit');
+      throw new ServiceError('Spent amount cannot exceed budget limit', 'BUSINESS_LOGIC_ERROR', HTTP_STATUS.BAD_REQUEST);
     }
     return createBudgetRepo(budget);
   } catch (error) {
-    throw new Error('Failed to create budget');
+    if (error instanceof ServiceError) {
+      throw error;
+    }
+    throw new ServiceError('Failed to create budget', 'CREATE_BUDGET_ERROR', HTTP_STATUS.INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -63,20 +68,23 @@ export const updateBudgetService = async (id: string, budget: Partial<Budget>): 
     const updatedData = { ...existing, ...budget };
     const { error } = updateBudgetSchema.validate(budget);
     if (error) {
-      throw new Error(`Validation error: ${error.details[0].message}`);
+      throw new ServiceError(`Validation error: ${error.details[0].message}`, 'VALIDATION_ERROR', HTTP_STATUS.BAD_REQUEST);
     }
     // Business logic: Prevent changing userId (if present)
     if (budget.userId !== undefined && budget.userId !== existing.userId) {
-      throw new Error('Cannot change budget userId');
+      throw new ServiceError('Cannot change budget userId', 'BUSINESS_LOGIC_ERROR', HTTP_STATUS.BAD_REQUEST);
     }
     // Business logic: Check spent vs limit
     if (updatedData.spent > updatedData.limit) {
-      throw new Error('Spent amount cannot exceed budget limit');
+      throw new ServiceError('Spent amount cannot exceed budget limit', 'BUSINESS_LOGIC_ERROR', HTTP_STATUS.BAD_REQUEST);
     }
     await updateBudgetRepo(id, budget);
     return { ...existing, ...budget, updatedAt: new Date() };
   } catch (error) {
-    throw new Error('Failed to update budget');
+    if (error instanceof ServiceError) {
+      throw error;
+    }
+    throw new ServiceError('Failed to update budget', 'UPDATE_BUDGET_ERROR', HTTP_STATUS.INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -94,6 +102,6 @@ export const deleteBudgetService = async (id: string): Promise<boolean> => {
     await deleteBudgetRepo(id);
     return true;
   } catch (error) {
-    throw new Error('Failed to delete budget');
+    throw new ServiceError('Failed to delete budget', 'DELETE_BUDGET_ERROR', HTTP_STATUS.INTERNAL_SERVER_ERROR);
   }
 };

@@ -43,18 +43,18 @@ import Joi from 'joi';
  *           example: "expense"
  *         currency:
  *           type: string
- *           description: Currency code
+ *           description: Currency code (ISO 4217, supported currencies include USD, EUR, GBP, JPY, CAD, AUD, CHF, CNY, SEK, NZD, and others available via exchange rate API)
  *           example: "USD"
  */
 
 export const createTransactionSchema = Joi.object({
   accountId: Joi.string().required(),
-  amount: Joi.number().required(),
+  amount: Joi.number().positive().required(),
   description: Joi.string().required(),
   date: Joi.date().required(),
   category: Joi.string().required(),
   type: Joi.string().valid('income', 'expense').required(),
-  currency: Joi.string().required(),
+  currency: Joi.string().uppercase().length(3).required(),
 });
 
 export const updateTransactionSchema = Joi.object({
@@ -98,4 +98,3 @@ export const updateTransactionSchema = Joi.object({
  *                 example: "must be a valid email address"
  *           description: Detailed validation errors (optional)
  */
-
