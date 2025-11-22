@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { getBudgets, getBudget, createBudget, updateBudget, deleteBudget } from '../controllers/budgetController';
 import { validateRequest } from '../middleware/validateRequest';
 import { createBudgetSchema, updateBudgetSchema } from '../validation/budgetValidation';
+import authenticate from '../middleware/authenticate';
+import isAuthorized from '../middleware/authorize';
 
 /**
  * @openapi
@@ -201,10 +203,30 @@ import { createBudgetSchema, updateBudgetSchema } from '../validation/budgetVali
 
 const router = Router();
 
+router.use(authenticate);
+
 router.get('/', getBudgets);
-router.get('/:id', getBudget);
-router.post('/', validateRequest(createBudgetSchema), createBudget);
-router.put('/:id', validateRequest(updateBudgetSchema), updateBudget);
-router.delete('/:id', deleteBudget);
+
+router.get('/:id', 
+    isAuthorized({ hasRole: ["admin", "manager", "user"], allowSameUser: true }),
+    getBudget
+);
+
+router.post('/', 
+    isAuthorized({ hasRole: ["admin", "manager", "user"] }), 
+    validateRequest(createBudgetSchema), 
+    createBudget
+);
+
+router.put('/:id', 
+    isAuthorized({ hasRole: ["admin", "manager"], allowSameUser: true }),
+    validateRequest(updateBudgetSchema), 
+    updateBudget
+);
+
+router.delete('/:id', 
+    isAuthorized({ hasRole: ["admin", "manager","user"], allowSameUser: true }), 
+    deleteBudget
+);
 
 export default router;
