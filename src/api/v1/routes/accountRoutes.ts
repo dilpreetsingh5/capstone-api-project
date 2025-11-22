@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { getAccounts, getAccount, createAccount, updateAccount, deleteAccount } from '../controllers/accountController';
 import { validateRequest } from '../middleware/validateRequest';
 import { createAccountSchema, updateAccountSchema } from '../validation/accountValidation';
+import authenticate from '../middleware/authenticate';
+import isAuthorized from '../middleware/authorize';
 
 /**
  * @openapi
@@ -346,10 +348,29 @@ import { createAccountSchema, updateAccountSchema } from '../validation/accountV
 
 const router = Router();
 
+router.use(authenticate);
+
 router.get('/', getAccounts);
-router.get('/:id', getAccount);
-router.post('/', validateRequest(createAccountSchema), createAccount);
-router.put('/:id', validateRequest(updateAccountSchema), updateAccount);
-router.delete('/:id', deleteAccount);
+
+router.get('/:id', 
+    isAuthorized({ hasRole: ["admin", "manager", "user"], allowSameUser: true }),
+    getAccount
+);
+
+router.post('/', 
+    isAuthorized({ hasRole: ["admin", "manager", "user"] }),
+    validateRequest(createAccountSchema), 
+    createAccount
+);
+router.put('/:id', 
+    isAuthorized({ hasRole: ["admin", "manager"], allowSameUser: true }),
+    validateRequest(updateAccountSchema), 
+    updateAccount
+);
+
+router.delete('/:id', 
+    isAuthorized({ hasRole: ["admin", "manager", "user"], allowSameUser: true }),
+    deleteAccount
+);
 
 export default router;
