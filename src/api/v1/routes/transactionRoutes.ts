@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { getTransactions, getTransaction, createTransaction, updateTransaction, deleteTransaction } from '../controllers/transactionController';
 import { validateRequest } from '../middleware/validateRequest';
 import { createTransactionSchema, updateTransactionSchema } from '../validation/transactionValidation';
+import authenticate from '../middleware/authenticate';
+import isAuthorized from '../middleware/authorize';
 
 /**
  * @openapi
@@ -201,10 +203,27 @@ import { createTransactionSchema, updateTransactionSchema } from '../validation/
 
 const router = Router();
 
+router.use(authenticate)
+
 router.get('/', getTransactions);
-router.get('/:id', getTransaction);
-router.post('/', validateRequest(createTransactionSchema), createTransaction);
-router.put('/:id', validateRequest(updateTransactionSchema), updateTransaction);
-router.delete('/:id', deleteTransaction);
+router.get('/:id', 
+    isAuthorized({ hasRole: ["admin", "manager", "user"], allowSameUser: true }),
+    getTransaction
+);
+
+router.post('/', 
+    isAuthorized({ hasRole: ["admin", "manager", "user"] }), 
+    validateRequest(createTransactionSchema), 
+    createTransaction
+
+);
+router.put('/:id', 
+    isAuthorized({ hasRole: ["admin", "manager"], allowSameUser: true }),
+    validateRequest(updateTransactionSchema), 
+    updateTransaction);
+
+router.delete('/:id', 
+    isAuthorized({ hasRole: ["admin", "manager","user"], allowSameUser: true }),
+    deleteTransaction);
 
 export default router;
