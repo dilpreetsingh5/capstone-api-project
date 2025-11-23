@@ -5,6 +5,7 @@ import { accessLogger, errorLogger, consoleLogger } from "./api/v1/middleware/lo
 import accountRoutes from './api/v1/routes/accountRoutes';
 import transactionRoutes from './api/v1/routes/transactionRoutes';
 import budgetRoutes from './api/v1/routes/budgetRoutes';
+import userRoutes from './api/v1/routes/userRoutes';
 import setupSwagger from '../config/swagger';
 
 dotenv.config();
@@ -37,6 +38,7 @@ setupSwagger(app);
 app.use('/api/v1/accounts', accountRoutes);
 app.use('/api/v1/transactions', transactionRoutes);
 app.use('/api/v1/budgets', budgetRoutes);
+app.use('/api/v1', userRoutes);
 
 // Error handling middleware
 import errorHandler from './api/v1/middleware/errorHandler';
