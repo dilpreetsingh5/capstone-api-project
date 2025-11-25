@@ -1,373 +1,314 @@
-# Personal Finance Management API
+# Financial Management API
 
-A secure, scalable RESTful API for managing personal finances built with Node.js, Express, TypeScript, and Firebase.
+A comprehensive RESTful API for managing personal finances, built with Node.js, Express, TypeScript, and Firebase. This API provides secure endpoints for managing accounts, transactions, budgets, and user authentication with role-based access control.
 
 ##  Features
 
-- **User Authentication**: Secure Firebase Authentication with JWT tokens
-- **Role-Based Access Control (RBAC)**: Admin, Manager, and User roles
-- **Account Management**: Create and manage multiple financial accounts
-- **Transaction Tracking**: Record and categorize income and expenses
-- **Budget Management**: Set and monitor spending budgets
-- **Currency Conversion**: Real-time currency exchange rates
-- **Comprehensive Error Handling**: Standardized error responses
+- **User Authentication & Authorization**: Firebase-based authentication with role-based access control (Admin, Manager, User)
+- **Account Management**: Create and manage multiple financial accounts (checking, savings, credit, investment)
+- **Transaction Tracking**: Record and categorize income and expenses with multi-currency support
+- **Budget Management**: Set and monitor spending budgets by category and time period
+- **Currency Conversion**: Automatic currency conversion using real-time exchange rates
+- **Data Validation**: Comprehensive input validation with detailed error messages
 - **API Documentation**: Interactive Swagger/OpenAPI documentation
-- **Full Test Coverage**: 74 passing tests with Jest
+- **Comprehensive Testing**: Full test coverage with Jest and Supertest
 
 ##  Prerequisites
 
-- Node.js (v16 or higher)
-- npm or yarn
-- Firebase project with Admin SDK credentials
-- Git
+Before you begin, ensure you have the following installed:
+
+- **Node.js** (v16 or higher)
+- **npm** (v8 or higher)
+- **Firebase Account** with a project set up
+- **Exchange Rate API Key** (from [exchangerate-api.com](https://www.exchangerate-api.com/))
 
 ##  Installation
 
-### 1. Clone the Repository
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd Milestone-03
+   ```
 
-```bash
-git clone <repository-url>
-cd Milestone-03
-```
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-### 2. Install Dependencies
+3. **Set up Firebase**
+   - Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
+   - Enable Authentication (Email/Password provider)
+   - Create a Firestore database
+   - Download your service account key (JSON file)
+   - Save it as `Security_Key.json` in the project root
 
-```bash
-npm install
-```
+4. **Configure environment variables**
+   
+   Create a `.env` file in the project root:
+   ```env
+   # Server Configuration
+   PORT=3000
+   NODE_ENV=development
 
-### 3. Configure Environment Variables
+   # Firebase Configuration
+   FIREBASE_PROJECT_ID=your-project-id
+   FIREBASE_CLIENT_EMAIL=your-client-email
+   FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 
-Create a `.env` file in the root directory:
+   # Exchange Rate API
+   EXCHANGE_RATE_API_KEY=your-exchange-rate-api-key
 
-```env
-# Server Configuration
-PORT=3000
-NODE_ENV=development
-
-# Firebase Configuration
-FIREBASE_PROJECT_ID=your-project-id
-FIREBASE_CLIENT_EMAIL=your-client-email@your-project.iam.gserviceaccount.com
-FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYour-Private-Key-Here\n-----END PRIVATE KEY-----\n"
-
-# API Configuration
-API_VERSION=v1
-```
-
-### 4. Set Up Firebase
-
-1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Create a new project or select an existing one
-3. Navigate to **Project Settings** > **Service Accounts**
-4. Click **Generate New Private Key**
-5. Save the JSON file securely
-6. Copy the credentials to your `.env` file
-
-### 5. Enable Firebase Authentication
-
-1. In Firebase Console, go to **Authentication**
-2. Click **Get Started**
-3. Enable **Email/Password** sign-in method
-4. Create test users for development
+   # Firebase Service Account Path
+   GOOGLE_APPLICATION_CREDENTIALS=./Security_Key.json
+   ```
 
 ##  Running the Application
 
 ### Development Mode
-
 ```bash
 npm start
 ```
 
 The server will start on `http://localhost:3000`
 
-### Run Tests
-
+### Running Tests
 ```bash
-# Run all tests
 npm test
-
-# Run tests in watch mode
-npm run test:watch
-
-# Run tests with coverage
-npm run test:coverage
 ```
 
-**Test Results**:  74/74 tests passing
+##  API Documentation
 
-### Generate API Documentation
+Once the server is running, access the interactive API documentation at:
+
+```
+http://localhost:3000/api-docs
+```
+
+The Swagger UI provides:
+- Complete endpoint documentation
+- Request/response schemas
+- Interactive API testing
+- Authentication examples
+
+### Generating Static Documentation
+
+To generate static HTML documentation:
 
 ```bash
 npm run generate-docs
 ```
 
-Access the documentation at `http://localhost:3000/api-docs`
+This creates an HTML file in the `docs/` directory.
 
 ##  Authentication
 
-### Getting a Firebase Token
+### Getting Started
 
-1. **Register a User** (via Firebase Console or client app)
+1. **Create a user** in Firebase Console or using Firebase SDK
+2. **Obtain an ID token** by signing in
+3. **Include the token** in API requests:
+   ```
+   Authorization: Bearer <your-firebase-id-token>
+   ```
 
-2. **Get ID Token** using Firebase REST API:
+### User Roles
 
-```bash
-curl --location 'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=YOUR_FIREBASE_API_KEY' \
---header 'Content-Type: application/json' \
---data-raw '{
-    "email": "user@example.com",
-    "password": "userpassword",
-    "returnSecureToken": true
-}'
-```
+- **Admin**: Full access to all endpoints, can manage user roles
+- **Manager**: Can manage accounts, transactions, and budgets for all users
+- **User**: Can only manage their own resources
 
-3. **Use the Token** in API requests:
-
-```bash
-curl --location 'http://localhost:3000/api/v1/accounts' \
---header 'Authorization: Bearer YOUR_ID_TOKEN'
-```
-
-### Setting User Roles
-
-User roles must be set using Firebase Custom Claims:
+### Setting User Roles (Admin Only)
 
 ```bash
-# Example: Set admin role
-curl --location 'http://localhost:3000/api/v1/admin/setCustomClaims' \
---header 'Authorization: Bearer ADMIN_TOKEN' \
---header 'Content-Type: application/json' \
---data '{
-    "uid": "user-uid-here",
-    "claims": {
-        "role": "admin"
-    }
-}'
-```
+POST /api/v1/admin/setCustomClaims
+Content-Type: application/json
+Authorization: Bearer <admin-token>
 
-**Available Roles:**
-- `admin`: Full access to all resources
-- `manager`: Can manage resources and users
-- `user`: Can manage own resources only
+{
+  "uid": "user-firebase-uid",
+  "claims": {
+    "role": "manager"
+  }
+}
+```
 
 ##  API Endpoints
 
-### Authentication Required
-
-All endpoints require a valid Firebase ID token in the Authorization header:
-
-```
-Authorization: Bearer <your-firebase-id-token>
-```
+### Users
+- `GET /api/v1/users/:id` - Get user details
+- `POST /api/v1/admin/setCustomClaims` - Set custom claims (Admin only)
 
 ### Accounts
-
-| Method | Endpoint | Access | Description |
-|--------|----------|--------|-------------|
-| GET | `/api/v1/accounts` | All authenticated users | Get all accounts |
-| GET | `/api/v1/accounts/:id` | Owner, Admin, Manager | Get account by ID |
-| POST | `/api/v1/accounts` | Admin, Manager | Create new account |
-| PUT | `/api/v1/accounts/:id` | Owner, Admin, Manager | Update account |
-| DELETE | `/api/v1/accounts/:id` | Admin, Manager | Delete account |
+- `GET /api/v1/accounts` - Get all accounts
+- `GET /api/v1/accounts/:id` - Get account by ID
+- `POST /api/v1/accounts` - Create new account
+- `PUT /api/v1/accounts/:id` - Update account
+- `DELETE /api/v1/accounts/:id` - Delete account
 
 ### Transactions
-
-| Method | Endpoint | Access | Description |
-|--------|----------|--------|-------------|
-| GET | `/api/v1/transactions` | All authenticated users | Get all transactions |
-| GET | `/api/v1/transactions/:id` | Owner, Admin, Manager | Get transaction by ID |
-| POST | `/api/v1/transactions` | All authenticated users | Create transaction |
-| PUT | `/api/v1/transactions/:id` | Owner, Admin, Manager | Update transaction |
-| DELETE | `/api/v1/transactions/:id` | Admin, Manager | Delete transaction |
+- `GET /api/v1/transactions` - Get all transactions
+- `GET /api/v1/transactions/:id` - Get transaction by ID
+- `POST /api/v1/transactions` - Create new transaction
+- `PUT /api/v1/transactions/:id` - Update transaction
+- `DELETE /api/v1/transactions/:id` - Delete transaction
 
 ### Budgets
-
-| Method | Endpoint | Access | Description |
-|--------|----------|--------|-------------|
-| GET | `/api/v1/budgets` | All authenticated users | Get all budgets |
-| GET | `/api/v1/budgets/:id` | Owner, Admin, Manager | Get budget by ID |
-| POST | `/api/v1/budgets` | All authenticated users | Create budget |
-| PUT | `/api/v1/budgets/:id` | Owner, Admin, Manager | Update budget |
-| DELETE | `/api/v1/budgets/:id` | Admin, Manager | Delete budget |
-
-### Users
-
-| Method | Endpoint | Access | Description |
-|--------|----------|--------|-------------|
-| GET | `/api/v1/users/:id` | Owner, Admin, Manager | Get user details |
-| POST | `/api/v1/admin/setCustomClaims` | Admin only | Set user roles |
-
-## 📝 Example Requests
-
-### Create an Account
-
-```bash
-curl --location 'http://localhost:3000/api/v1/accounts' \
---header 'Authorization: Bearer YOUR_TOKEN' \
---header 'Content-Type: application/json' \
---data '{
-    "name": "Main Checking",
-    "type": "checking",
-    "balance": 5000.00,
-    "currency": "USD"
-}'
-```
-
-### Create a Transaction
-
-```bash
-curl --location 'http://localhost:3000/api/v1/transactions' \
---header 'Authorization: Bearer YOUR_TOKEN' \
---header 'Content-Type: application/json' \
---data '{
-    "accountId": "account-id-here",
-    "type": "expense",
-    "amount": 50.00,
-    "category": "groceries",
-    "description": "Weekly grocery shopping",
-    "date": "2024-01-15"
-}'
-```
-
-### Create a Budget
-
-```bash
-curl --location 'http://localhost:3000/api/v1/budgets' \
---header 'Authorization: Bearer YOUR_TOKEN' \
---header 'Content-Type: application/json' \
---data '{
-    "category": "groceries",
-    "limit": 500.00,
-    "period": "monthly",
-    "startDate": "2024-01-01",
-    "endDate": "2024-01-31"
-}'
-```
-
-##  Security Features
-
-### Authentication
-- Firebase JWT token verification
-- Secure token validation on every request
-- Automatic token expiration handling
-
-### Authorization
-- Role-based access control (RBAC)
-- Resource ownership validation
-- Granular permission system
-
-### Error Handling
-- Standardized error responses
-- Secure error messages (no sensitive data leakage)
-- Comprehensive error logging
-
-### Data Protection
-- Input validation with Joi schemas
-- NoSQL injection prevention
-- XSS protection ready
-- Rate limiting ready
-
-##  Testing
-
-The project includes comprehensive test coverage with 74 passing tests:
-
-### Test Suites
--  Authentication Middleware (6 tests)
--  Authorization Middleware (9 tests)
--  Error Handler Middleware (9 tests)
--  Account Controller (13 tests)
--  Budget Controller (13 tests)
--  Transaction Controller (16 tests)
--  Currency Service (8 tests)
-
-### Running Tests
-
-```bash
-npm test
-```
+- `GET /api/v1/budgets` - Get all budgets
+- `GET /api/v1/budgets/:id` - Get budget by ID
+- `POST /api/v1/budgets` - Create new budget
+- `PUT /api/v1/budgets/:id` - Update budget
+- `DELETE /api/v1/budgets/:id` - Delete budget
 
 ##  Project Structure
 
 ```
 Milestone-03/
-├── config/
-│   ├── firebaseConfig.ts      # Firebase Admin SDK setup
-│   ├── swagger.ts              # Swagger configuration
-│   └── swaggerOptions.ts       # Swagger options
+├── config/                 # Configuration files
+│   ├── firebaseConfig.ts   # Firebase initialization
+│   ├── swagger.ts          # Swagger setup
+│   └── swaggerOptions.ts   # Swagger configuration
 ├── src/
-│   ├── api/
-│   │   └── v1/
-│   │       ├── controllers/    # Request handlers
-│   │       ├── errors/         # Custom error classes
-│   │       ├── middleware/     # Authentication, authorization, etc.
-│   │       ├── models/         # Data models and interfaces
-│   │       ├── repositories/   # Database access layer
-│   │       ├── routes/         # API route definitions
-│   │       ├── services/       # Business logic
-│   │       ├── types/          # TypeScript type definitions
-│   │       ├── utils/          # Utility functions
-│   │       └── validation/     # Input validation schemas
-│   ├── constants/              # Application constants
-│   ├── logs/                   # Application logs
-│   ├── app.ts                  # Express app setup
-│   └── server.ts               # Server entry point
-├── test/                       # Test files
-│   └── middleware/             # Middleware tests
-├── .env                        # Environment variables (not in repo)
-├── .gitignore                  # Git ignore rules
-├── package.json                # Dependencies and scripts
-├── tsconfig.json               # TypeScript configuration
-└── README.md                   # This file
+│   ├── api/v1/
+│   │   ├── controllers/    # Request handlers
+│   │   ├── middleware/     # Custom middleware
+│   │   ├── models/         # Data models and schemas
+│   │   ├── repositories/   # Data access layer
+│   │   ├── routes/         # API routes
+│   │   ├── services/       # Business logic
+│   │   ├── validation/     # Input validation schemas
+│   │   └── errors/         # Error handling
+│   ├── constants/          # Application constants
+│   ├── app.ts              # Express app setup
+│   └── server.ts           # Server entry point
+├── test/                   # Test files
+├── docs/                   # Generated documentation
+├── .env                    # Environment variables
+├── package.json            # Dependencies and scripts
+└── tsconfig.json           # TypeScript configuration
 ```
 
-## 🔧 Configuration
+##  Testing
 
-### HTTP Status Codes
+The project includes comprehensive test coverage:
 
-- `200 OK`: Successful GET, PUT requests
-- `201 Created`: Successful POST requests
-- `204 No Content`: Successful DELETE requests
-- `400 Bad Request`: Invalid input data
-- `401 Unauthorized`: Missing or invalid authentication
-- `403 Forbidden`: Insufficient permissions
-- `404 Not Found`: Resource not found
-- `422 Unprocessable Entity`: Validation errors
-- `500 Internal Server Error`: Server errors
+- **Unit Tests**: Controller, service, and middleware tests
+- **Integration Tests**: End-to-end API tests
+- **Authentication Tests**: Firebase auth and authorization tests
 
-### Response Format
+### Test Coverage
 
-**Success Response:**
+- 74 tests across 7 test suites
+- Controllers: Account, Budget, Transaction, User
+- Middleware: Authentication, Authorization, Error Handler
+- Services: Currency conversion
+
+### Running Specific Tests
+
+```bash
+# Run specific test file
+npm test -- accountController.test.ts
+
+# Run tests in watch mode
+npm test -- --watch
+
+# Run tests with coverage
+npm test -- --coverage
+```
+
+##  Security Features
+
+- **Firebase Authentication**: Secure token-based authentication
+- **Role-Based Access Control**: Fine-grained permissions
+- **Input Validation**: Comprehensive validation with Joi
+- **Error Handling**: Secure error messages without sensitive data
+- **CORS**: Configurable cross-origin resource sharing
+- **Helmet**: Security headers middleware
+- **Rate Limiting**: Protection against abuse (configurable)
+
+##  Data Validation Rules
+
+### Accounts
+- Name: 3-50 characters
+- Balance: -1,000,000 to 100,000,000 (2 decimal places)
+- Currency: ISO 4217 format (3 uppercase letters)
+- Type: checking, savings, credit, investment
+
+### Transactions
+- Amount: 0.01 to 1,000,000 (2 decimal places)
+- Description: 3-200 characters
+- Date: Cannot be in future or more than 1 year in past
+- Category: Any string (2-50 characters)
+- Type: income or expense
+- Currency: ISO 4217 format
+
+### Budgets
+- Category: 2-50 characters
+- Limit: 1 to 1,000,000 (2 decimal places)
+- Spent: 0 to 150% of limit (2 decimal places)
+- Month: 1-12
+- Year: 2000 to current year + 1
+
+##  Multi-Currency Support
+
+The API supports multiple currencies with automatic conversion:
+
+- Real-time exchange rates via ExchangeRate-API
+- Automatic conversion to base currency (USD)
+- Support for all major world currencies
+- Currency validation in ISO 4217 format
+
+##  Error Handling
+
+The API returns consistent error responses:
+
 ```json
 {
-    "success": true,
-    "message": "Operation completed successfully",
-    "data": { }
+  "success": false,
+  "message": "Error description",
+  "details": ["Detailed error messages"]
 }
 ```
 
-**Error Response:**
-```json
-{
-    "success": false,
-    "error": "ERROR_CODE",
-    "message": "Human-readable error message",
-    "timestamp": "2024-01-15T10:30:00.000Z"
-}
-```
+### Common HTTP Status Codes
+
+- `200` - Success
+- `201` - Created
+- `400` - Bad Request (validation errors)
+- `401` - Unauthorized (authentication required)
+- `403` - Forbidden (insufficient permissions)
+- `404` - Not Found
+- `500` - Internal Server Error
 
 ##  Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/advance-features`)
-3. Commit your changes (`git commit -m 'Add some advance-features'`)
-4. Push to the branch (`git push origin feature/advance-features`)
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## Acknowledgments
+##  License
 
-- Firebase for authentication and database services
+This project is licensed under the ISC License.
+
+##  Authors
+
+- Your Name - Dilpreet Singh
+
+##  Acknowledgments
+
+- Firebase for authentication and database
+- ExchangeRate-API for currency conversion
 - Express.js community
 - TypeScript team
-- Jest testing framework
 
-**Built with using Node.js, Express, TypeScript, and Firebase**
+
+##  Version History
+
+- **1.0.0** (Current)
+  - Initial release
+  - User authentication and authorization
+  - Account, transaction, and budget management
+  - Multi-currency support
+  - Comprehensive API documentation
+  - Full test coverage
