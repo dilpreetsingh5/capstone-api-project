@@ -19,6 +19,8 @@ import isAuthorized from '../middleware/authorize';
  *     summary: Retrieve all accounts
  *     description: Get a list of all user accounts from the database
  *     tags: [Accounts]
+ *     security:
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: Accounts retrieved successfully
@@ -37,6 +39,19 @@ import isAuthorized from '../middleware/authorize';
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/Account'
+ *      401:
+ *         description: Unauthorized - Missing or invalid authentication token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized"
  *       500:
  *         description: Internal server error
  *         content:
@@ -59,6 +74,8 @@ import isAuthorized from '../middleware/authorize';
  *     summary: Retrieve account by ID
  *     description: Get a specific account by its unique identifier
  *     tags: [Accounts]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -83,6 +100,32 @@ import isAuthorized from '../middleware/authorize';
  *                   example: "Account retrieved successfully"
  *                 data:
  *                   $ref: '#/components/schemas/Account'
+ *       01:
+ *         description: Unauthorized - Missing or invalid authentication token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized"
+ *       403:
+ *         description: Forbidden - Insufficient permissions to access this account
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Forbidden"
  *       404:
  *         description: Account not found
  *         content:
@@ -118,6 +161,8 @@ import isAuthorized from '../middleware/authorize';
  *     summary: Create a new account
  *     description: Create a new financial account with the provided information
  *     tags: [Accounts]
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -178,6 +223,32 @@ import isAuthorized from '../middleware/authorize';
  *                   items:
  *                     type: string
  *                   example: ["\"name\" is required", "\"type\" must be one of [checking, savings, credit]"]
+ *       401:
+ *         description: Unauthorized - Missing or invalid authentication token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized"
+ *       403:
+ *         description: Forbidden - Insufficient permissions to create account
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Forbidden"
  *       500:
  *         description: Internal server error
  *         content:
@@ -200,6 +271,8 @@ import isAuthorized from '../middleware/authorize';
  *     summary: Update account by ID
  *     description: Update an existing account with partial data (only provided fields will be updated)
  *     tags: [Accounts]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -258,6 +331,32 @@ import isAuthorized from '../middleware/authorize';
  *                   items:
  *                     type: string
  *                   example: ["\"balance\" must be a number"]
+ *       401:
+ *         description: Unauthorized - Missing or invalid authentication token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized"
+ *       403:
+ *         description: Forbidden - Insufficient permissions to update this account
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Forbidden"
  *       404:
  *         description: Account not found
  *         content:
@@ -293,6 +392,8 @@ import isAuthorized from '../middleware/authorize';
  *     summary: Delete account by ID
  *     description: Permanently delete an account and all associated data
  *     tags: [Accounts]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -318,6 +419,32 @@ import isAuthorized from '../middleware/authorize';
  *                 data:
  *                   type: object
  *                   example: {}
+ *       401:
+ *         description: Unauthorized - Missing or invalid authentication token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized"
+ *       403:
+ *         description: Forbidden - Insufficient permissions to delete this account
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Forbidden"
  *       404:
  *         description: Account not found
  *         content:
@@ -362,6 +489,7 @@ router.post('/',
     validateRequest(createAccountSchema), 
     createAccount
 );
+
 router.put('/:id', 
     isAuthorized({ hasRole: ["admin", "manager"], allowSameUser: true }),
     validateRequest(updateAccountSchema), 
