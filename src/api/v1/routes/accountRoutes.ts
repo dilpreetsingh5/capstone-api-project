@@ -39,7 +39,7 @@ import isAuthorized from '../middleware/authorize';
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/Account'
- *      401:
+ *       401:
  *         description: Unauthorized - Missing or invalid authentication token
  *         content:
  *           application/json:
@@ -100,7 +100,7 @@ import isAuthorized from '../middleware/authorize';
  *                   example: "Account retrieved successfully"
  *                 data:
  *                   $ref: '#/components/schemas/Account'
- *       01:
+ *       401:
  *         description: Unauthorized - Missing or invalid authentication token
  *         content:
  *           application/json:
@@ -181,7 +181,7 @@ import isAuthorized from '../middleware/authorize';
  *                 example: "Main Checking"
  *               type:
  *                 type: string
- *                 enum: [checking, savings, credit]
+ *                 enum: [checking, savings, credit, investment]
  *                 description: Type of account
  *                 example: "checking"
  *               balance:
@@ -222,7 +222,7 @@ import isAuthorized from '../middleware/authorize';
  *                   type: array
  *                   items:
  *                     type: string
- *                   example: ["\"name\" is required", "\"type\" must be one of [checking, savings, credit]"]
+ *                   example: ["\"name\" is required", "\"type\" must be one of [checking, savings, credit, investment]"]
  *       401:
  *         description: Unauthorized - Missing or invalid authentication token
  *         content:
