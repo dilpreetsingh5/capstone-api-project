@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { getBudgets, getBudget, createBudget, updateBudget, deleteBudget } from '../controllers/budgetController';
 import { validateRequest } from '../middleware/validateRequest';
 import { createBudgetSchema, updateBudgetSchema } from '../validation/budgetValidation';
+import authenticate from '../middleware/authenticate';
+import isAuthorized from '../middleware/authorize';
 
 /**
  * @openapi
@@ -17,6 +19,8 @@ import { createBudgetSchema, updateBudgetSchema } from '../validation/budgetVali
  *     summary: Retrieve all budgets
  *     description: Get a list of all spending budgets from the database
  *     tags: [Budgets]
+ *     security:
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: Budgets retrieved successfully
@@ -35,6 +39,19 @@ import { createBudgetSchema, updateBudgetSchema } from '../validation/budgetVali
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/Budget'
+ *       401:
+ *         description: Unauthorized - Missing or invalid authentication token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized"
  *       500:
  *         description: Internal server error
  *         content:
@@ -56,6 +73,8 @@ import { createBudgetSchema, updateBudgetSchema } from '../validation/budgetVali
  *   get:
  *     summary: Get budget by ID
  *     tags: [Budgets]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -79,10 +98,58 @@ import { createBudgetSchema, updateBudgetSchema } from '../validation/budgetVali
  *                   example: "Budget retrieved successfully"
  *                 data:
  *                   $ref: '#/components/schemas/Budget'
+ *       401:
+ *         description: Unauthorized - Missing or invalid authentication token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized"
+ *       403:
+ *         description: Forbidden - Insufficient permissions to access this budget
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Forbidden"
  *       404:
  *         description: Budget not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Budget not found"
  *       500:
  *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Internal server error"
  */
 
 /**
@@ -91,6 +158,8 @@ import { createBudgetSchema, updateBudgetSchema } from '../validation/budgetVali
  *   post:
  *     summary: Create a new budget
  *     tags: [Budgets]
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -114,9 +183,59 @@ import { createBudgetSchema, updateBudgetSchema } from '../validation/budgetVali
  *                 data:
  *                   $ref: '#/components/schemas/Budget'
  *       400:
- *         description: Validation failed
+ *         description: Validation failed - invalid input data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Validation failed"
+ *                 details:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: ["\"spent\" cannot exceed 150% of limit", "\"month\" must be between 1 and 12"]
+ *       401:
+ *         description: Unauthorized - Missing or invalid authentication token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized"
+ *       403:
+ *         description: Forbidden - Insufficient permissions to create budget
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Forbidden"
  *       500:
  *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Internal server error"
  */
 
 /**
@@ -125,6 +244,8 @@ import { createBudgetSchema, updateBudgetSchema } from '../validation/budgetVali
  *   put:
  *     summary: Update budget by ID
  *     tags: [Budgets]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -156,11 +277,72 @@ import { createBudgetSchema, updateBudgetSchema } from '../validation/budgetVali
  *                   type: object
  *                   example: {}
  *       400:
- *         description: Validation failed
+ *         description: Validation failed - invalid input data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Validation failed"
+ *                 details:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: ["\"limit\" must be a positive number"]
+ *       401:
+ *         description: Unauthorized - Missing or invalid authentication token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized"
+ *       403:
+ *         description: Forbidden - Insufficient permissions to update this budget
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Forbidden"
  *       404:
  *         description: Budget not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Budget not found"
  *       500:
  *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Internal server error"
  */
 
 /**
@@ -169,6 +351,8 @@ import { createBudgetSchema, updateBudgetSchema } from '../validation/budgetVali
  *   delete:
  *     summary: Delete budget by ID
  *     tags: [Budgets]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -193,18 +377,86 @@ import { createBudgetSchema, updateBudgetSchema } from '../validation/budgetVali
  *                 data:
  *                   type: object
  *                   example: {}
+ *       401:
+ *         description: Unauthorized - Missing or invalid authentication token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized"
+ *       403:
+ *         description: Forbidden - Insufficient permissions to delete this budget
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Forbidden"
  *       404:
  *         description: Budget not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Budget not found"
  *       500:
  *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Internal server error"
  */
 
 const router = Router();
 
+router.use(authenticate);
+
 router.get('/', getBudgets);
-router.get('/:id', getBudget);
-router.post('/', validateRequest(createBudgetSchema), createBudget);
-router.put('/:id', validateRequest(updateBudgetSchema), updateBudget);
-router.delete('/:id', deleteBudget);
+
+router.get('/:id', 
+    isAuthorized({ hasRole: ["admin", "manager", "user"], allowSameUser: true }),
+    getBudget
+);
+
+router.post('/', 
+    isAuthorized({ hasRole: ["admin", "manager", "user"] }), 
+    validateRequest(createBudgetSchema), 
+    createBudget
+);
+
+router.put('/:id', 
+    isAuthorized({ hasRole: ["admin", "manager"], allowSameUser: true }),
+    validateRequest(updateBudgetSchema), 
+    updateBudget
+);
+
+router.delete('/:id', 
+    isAuthorized({ hasRole: ["admin", "manager","user"], allowSameUser: true }), 
+    deleteBudget
+);
 
 export default router;

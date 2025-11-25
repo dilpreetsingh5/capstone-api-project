@@ -14,7 +14,9 @@ import Joi from 'joi';
  *       properties:
  *         name:
  *           type: string
- *           description: Name of the account
+ *           minLength: 3
+ *           maxLength: 50
+ *           description: Name of the account (3-50 characters)
  *           example: "Main Checking"
  *         type:
  *           type: string
@@ -23,26 +25,102 @@ import Joi from 'joi';
  *           example: "checking"
  *         balance:
  *           type: number
- *           description: Current balance of the account
+ *           description: Current balance of the account. Credit accounts can have negative balances.
  *           example: 1500.00
  *         currency:
  *           type: string
- *           description: Currency code
+ *           pattern: '^[A-Z]{3}$'
+ *           description: Currency code (ISO 4217, 3 uppercase letters)
  *           example: "USD"
  */
 
 export const createAccountSchema = Joi.object({
-  name: Joi.string().required(),
-  type: Joi.string().valid('checking', 'savings', 'credit', 'investment').required(),
-  balance: Joi.number().required(),
-  currency: Joi.string().required(),
+  name: Joi.string()
+    .min(3)
+    .max(50)
+    .trim()
+    .required()
+    .messages({
+      'string.min': 'Account name must be at least 3 characters long',
+      'string.max': 'Account name cannot exceed 50 characters',
+      'string.empty': 'Account name is required',
+      'any.required': 'Account name is required'
+    }),
+    
+  type: Joi.string()
+    .valid('checking', 'savings', 'credit', 'investment')
+    .required()
+    .messages({
+      'any.only': 'Account type must be one of: checking, savings, credit, investment',
+      'any.required': 'Account type is required'
+    }),
+
+  balance: Joi.number()
+    .precision(2)
+    .min(-1000000)
+    .max(100000000)
+    .required()
+    .messages({
+      'number.base': 'Balance must be a valid number',
+      'number.precision': 'Balance can have at most 2 decimal places',
+      'number.min': 'Balance cannot be less than -1,000,000',
+      'number.max': 'Balance cannot exceed 100,000,000',
+      'any.required': 'Balance is required'
+    }),
+
+  currency: Joi.string()
+    .length(3)
+    .uppercase()
+    .pattern(/^[A-Z]{3}$/)
+    .required()
+    .messages({
+      'string.length': 'Currency code must be exactly 3 characters',
+      'string.pattern.base': 'Currency code must be 3 uppercase letters (ISO 4217 format)',
+      'any.required': 'Currency is required'
+    }),
 });
 
 export const updateAccountSchema = Joi.object({
-  name: Joi.string().optional(),
-  type: Joi.string().valid('checking', 'savings', 'credit', 'investment').optional(),
-  balance: Joi.number().optional(),
-  currency: Joi.string().optional(),
+  name: Joi.string()
+    .min(3)
+    .max(50)
+    .trim()
+    .optional()
+    .messages({
+      'string.min': 'Account name must be at least 3 characters long',
+      'string.max': 'Account name cannot exceed 50 characters'
+    }),
+
+  type: Joi.string()
+    .valid('checking', 'savings', 'credit', 'investment')
+    .optional()
+    .messages({
+      'any.only': 'Account type must be one of: checking, savings, credit, investment'
+    }),
+
+  balance: Joi.number()
+    .precision(2)
+    .min(-1000000)
+    .max(100000000)
+    .optional()
+    .messages({
+      'number.base': 'Balance must be a valid number',
+      'number.precision': 'Balance can have at most 2 decimal places',
+      'number.min': 'Balance cannot be less than -1,000,000',
+      'number.max': 'Balance cannot exceed 100,000,000'
+    }),
+
+  currency: Joi.string()
+    .length(3)
+    .uppercase()
+    .pattern(/^[A-Z]{3}$/)
+    .optional()
+    .messages({
+      'string.length': 'Currency code must be exactly 3 characters',
+      'string.pattern.base': 'Currency code must be 3 uppercase letters (ISO 4217 format)'
+    }),
+}).min(1).messages({
+  'object.min': 'At least one field must be provided for update'
 });
 
 /**

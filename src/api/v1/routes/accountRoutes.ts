@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { getAccounts, getAccount, createAccount, updateAccount, deleteAccount } from '../controllers/accountController';
 import { validateRequest } from '../middleware/validateRequest';
 import { createAccountSchema, updateAccountSchema } from '../validation/accountValidation';
+import authenticate from '../middleware/authenticate';
+import isAuthorized from '../middleware/authorize';
 
 /**
  * @openapi
@@ -17,6 +19,8 @@ import { createAccountSchema, updateAccountSchema } from '../validation/accountV
  *     summary: Retrieve all accounts
  *     description: Get a list of all user accounts from the database
  *     tags: [Accounts]
+ *     security:
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: Accounts retrieved successfully
@@ -35,6 +39,19 @@ import { createAccountSchema, updateAccountSchema } from '../validation/accountV
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/Account'
+ *       401:
+ *         description: Unauthorized - Missing or invalid authentication token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized"
  *       500:
  *         description: Internal server error
  *         content:
@@ -57,6 +74,8 @@ import { createAccountSchema, updateAccountSchema } from '../validation/accountV
  *     summary: Retrieve account by ID
  *     description: Get a specific account by its unique identifier
  *     tags: [Accounts]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -81,6 +100,32 @@ import { createAccountSchema, updateAccountSchema } from '../validation/accountV
  *                   example: "Account retrieved successfully"
  *                 data:
  *                   $ref: '#/components/schemas/Account'
+ *       401:
+ *         description: Unauthorized - Missing or invalid authentication token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized"
+ *       403:
+ *         description: Forbidden - Insufficient permissions to access this account
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Forbidden"
  *       404:
  *         description: Account not found
  *         content:
@@ -116,6 +161,8 @@ import { createAccountSchema, updateAccountSchema } from '../validation/accountV
  *     summary: Create a new account
  *     description: Create a new financial account with the provided information
  *     tags: [Accounts]
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -134,7 +181,7 @@ import { createAccountSchema, updateAccountSchema } from '../validation/accountV
  *                 example: "Main Checking"
  *               type:
  *                 type: string
- *                 enum: [checking, savings, credit]
+ *                 enum: [checking, savings, credit, investment]
  *                 description: Type of account
  *                 example: "checking"
  *               balance:
@@ -175,7 +222,33 @@ import { createAccountSchema, updateAccountSchema } from '../validation/accountV
  *                   type: array
  *                   items:
  *                     type: string
- *                   example: ["\"name\" is required", "\"type\" must be one of [checking, savings, credit]"]
+ *                   example: ["\"name\" is required", "\"type\" must be one of [checking, savings, credit, investment]"]
+ *       401:
+ *         description: Unauthorized - Missing or invalid authentication token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized"
+ *       403:
+ *         description: Forbidden - Insufficient permissions to create account
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Forbidden"
  *       500:
  *         description: Internal server error
  *         content:
@@ -198,6 +271,8 @@ import { createAccountSchema, updateAccountSchema } from '../validation/accountV
  *     summary: Update account by ID
  *     description: Update an existing account with partial data (only provided fields will be updated)
  *     tags: [Accounts]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -256,6 +331,32 @@ import { createAccountSchema, updateAccountSchema } from '../validation/accountV
  *                   items:
  *                     type: string
  *                   example: ["\"balance\" must be a number"]
+ *       401:
+ *         description: Unauthorized - Missing or invalid authentication token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized"
+ *       403:
+ *         description: Forbidden - Insufficient permissions to update this account
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Forbidden"
  *       404:
  *         description: Account not found
  *         content:
@@ -291,6 +392,8 @@ import { createAccountSchema, updateAccountSchema } from '../validation/accountV
  *     summary: Delete account by ID
  *     description: Permanently delete an account and all associated data
  *     tags: [Accounts]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -316,6 +419,32 @@ import { createAccountSchema, updateAccountSchema } from '../validation/accountV
  *                 data:
  *                   type: object
  *                   example: {}
+ *       401:
+ *         description: Unauthorized - Missing or invalid authentication token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized"
+ *       403:
+ *         description: Forbidden - Insufficient permissions to delete this account
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Forbidden"
  *       404:
  *         description: Account not found
  *         content:
@@ -346,10 +475,30 @@ import { createAccountSchema, updateAccountSchema } from '../validation/accountV
 
 const router = Router();
 
+router.use(authenticate);
+
 router.get('/', getAccounts);
-router.get('/:id', getAccount);
-router.post('/', validateRequest(createAccountSchema), createAccount);
-router.put('/:id', validateRequest(updateAccountSchema), updateAccount);
-router.delete('/:id', deleteAccount);
+
+router.get('/:id', 
+    isAuthorized({ hasRole: ["admin", "manager", "user"], allowSameUser: true }),
+    getAccount
+);
+
+router.post('/', 
+    isAuthorized({ hasRole: ["admin", "manager", "user"] }),
+    validateRequest(createAccountSchema), 
+    createAccount
+);
+
+router.put('/:id', 
+    isAuthorized({ hasRole: ["admin", "manager"], allowSameUser: true }),
+    validateRequest(updateAccountSchema), 
+    updateAccount
+);
+
+router.delete('/:id', 
+    isAuthorized({ hasRole: ["admin", "manager", "user"], allowSameUser: true }),
+    deleteAccount
+);
 
 export default router;
