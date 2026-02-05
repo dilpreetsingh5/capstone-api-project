@@ -1,2 +1,7 @@
 node_modules/
 dist/
+logs/
+*.log
+Security_Key.json
+openapi.json
+.env
